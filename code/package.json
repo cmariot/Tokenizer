@@ -1,0 +1,12 @@
+{
+  "name": "Coin42",
+  "version": "1.0.0",
+  "description": "A token created for the 42 project Tokenizer",
+  "main": "index.js",
+  "repository": "https://github.com/cmariot/Tokenizer",
+  "author": "cmariot",
+  "license": "MIT",
+  "dependencies": {
+      "@openzeppelin/contracts": "^5.1.0"
+    }
+}
