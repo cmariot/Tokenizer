@@ -18,5 +18,6 @@ clean:
 	rm -rf $(CODE_DIR)/artifacts
 	rm -rf $(CODE_DIR)/cache
 	rm -rf $(CODE_DIR)/node_modules
+	rm -rf $(CODE_DIR)/yarn.lock
 
 .PHONY: all yarn compile test deploy
