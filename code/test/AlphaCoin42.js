@@ -1,14 +1,15 @@
 const { expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-const { MaxUint256 } = require("ethers");
+const { ethers } = require("hardhat");
 
 describe("AlphaCoin42 contract", function () {
 
     async function deployTokenFixture() {
-        const [owner, addr1, addr2] = await ethers.getSigners();
-        const hardhatToken = await ethers.deployContract("AlphaCoin42");
+        const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+        const requiredSignatures = 2;
+        const hardhatToken = await ethers.deployContract("AlphaCoin42", [[owner.address, addr1.address, addr2.address], requiredSignatures]);
         await hardhatToken.waitForDeployment();
-        return { hardhatToken, owner, addr1, addr2 };
+        return { hardhatToken, owner, addr1, addr2, addr3 };
     }
 
     describe("Construction", function () {
@@ -36,12 +37,12 @@ describe("AlphaCoin42 contract", function () {
             expect(totalSupply).to.equal(expectedTotalSupply);
         });
 
-        it("Should assign the total supply to the owner", async function () {
-            const { hardhatToken, owner } = await loadFixture(deployTokenFixture);
-            const ownerBalance = await hardhatToken.balanceOf(owner.address);
-            const totalSupply = await hardhatToken.totalSupply();
-            expect(ownerBalance).to.equal(totalSupply);
-        });
+        // it("Should assign the total supply to the owner", async function () {
+        //     const { hardhatToken, owner } = await loadFixture(deployTokenFixture);
+        //     const ownerBalance = await hardhatToken.balanceOf(owner.address);
+        //     const totalSupply = await hardhatToken.totalSupply();
+        //     expect(ownerBalance).to.equal(totalSupply);
+        // });
 
         it("Should emit a Transfer event with the total supply", async function () {
             const { hardhatToken, owner } = await loadFixture(deployTokenFixture);
@@ -54,6 +55,28 @@ describe("AlphaCoin42 contract", function () {
             expect(event.args._value).to.equal(totalSupply);
         });
 
+        it("Should set the signers", async function () {
+            const { hardhatToken, owner, addr1, addr2, addr3 } = await loadFixture(deployTokenFixture);
+
+            expect(await hardhatToken.isSigner(owner.address)).to.be.true;
+            expect(await hardhatToken.isSigner(addr1.address)).to.be.true;
+            expect(await hardhatToken.isSigner(addr2.address)).to.be.true;
+
+            expect(await hardhatToken.isSigner(addr3.address)).to.be.false;
+        });
+
+        it("Should split the total supply between the signers", async function () {
+            const { hardhatToken, owner, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            const ownerBalance = await hardhatToken.balanceOf(owner.address);
+            const addr1Balance = await hardhatToken.balanceOf(addr1.address);
+            const addr2Balance = await hardhatToken.balanceOf(addr2.address);
+            const totalSupply = await hardhatToken.totalSupply();
+            const expectedBalance = totalSupply / BigInt(3);
+            expect(ownerBalance).to.equal(expectedBalance);
+            expect(addr1Balance).to.equal(expectedBalance);
+            expect(addr2Balance).to.equal(expectedBalance);
+        });
+
     });
 
 
@@ -62,18 +85,18 @@ describe("AlphaCoin42 contract", function () {
         it("Should return the balance of the owner", async function () {
             const { hardhatToken, owner } = await loadFixture(deployTokenFixture);
             const ownerBalance = await hardhatToken.balanceOf(owner.address);
-            const totalSupply = await hardhatToken.totalSupply();
+            const totalSupply = await hardhatToken.totalSupply() / BigInt(3);
             expect(ownerBalance).to.equal(totalSupply);
         });
 
         it("Should return 0 for an address with no balance", async function () {
-            const { hardhatToken, owner, addr1 } = await loadFixture(deployTokenFixture);
-            expect(addr1.address).to.not.equal(owner.address);
+            const { hardhatToken, owner, addr1, addr2, addr3 } = await loadFixture(deployTokenFixture);
+            expect(addr3.address).to.not.equal(owner.address);
             const ownerBalance = await hardhatToken.balanceOf(owner.address);
             const totalSupply = await hardhatToken.totalSupply();
-            expect(ownerBalance).to.equal(totalSupply);
-            const addr1Balance = await hardhatToken.balanceOf(addr1.address);
-            expect(addr1Balance).to.equal(0);
+            expect(ownerBalance).to.equal(totalSupply / BigInt(3));
+            const addr3Balance = await hardhatToken.balanceOf(addr3.address);
+            expect(addr3Balance).to.equal(0);
         });
 
     });
@@ -88,8 +111,9 @@ describe("AlphaCoin42 contract", function () {
             const ownerBalance = await hardhatToken.balanceOf(owner.address);
             const addr1Balance = await hardhatToken.balanceOf(addr1.address);
             const totalSupply = await hardhatToken.totalSupply();
-            expect(ownerBalance).to.equal(totalSupply - amount);
-            expect(addr1Balance).to.equal(amount);
+            const initialAmount = totalSupply / BigInt(3);
+            expect(ownerBalance).to.equal(initialAmount - amount);
+            expect(addr1Balance).to.equal(initialAmount + amount);
         });
 
         it("Should emit a Transfer event", async function () {
@@ -171,12 +195,23 @@ describe("AlphaCoin42 contract", function () {
 
         it("Should allow spending within the approved allowance", async function () {
             const { hardhatToken, owner, addr1, addr2 } = await loadFixture(deployTokenFixture);
-            const amount = BigInt(200);
-            await hardhatToken.approve(addr1.address, amount);
 
+            const initialAmount = await hardhatToken.balanceOf(addr2.address);
+            const amount = BigInt(200);
+
+            // Owner approves addr1 to spend amount tokens from owner's account
+            await hardhatToken.approve(addr1.address, amount);
             await hardhatToken.connect(addr1).transferFrom(owner.address, addr2.address, amount);
 
-            expect(await hardhatToken.balanceOf(addr2.address)).to.equal(amount);
+            // Addr2 should have initialAmount + amount tokens
+            const newBalance = await hardhatToken.balanceOf(addr2.address);
+            expect(newBalance).to.equal(initialAmount + amount);
+
+            // Owner should have initialAmount - amount tokens
+            const ownerBalance = await hardhatToken.balanceOf(owner.address);
+            expect(ownerBalance).to.equal(initialAmount - amount);
+
+            // Allowance should be reduced by amount
             expect(await hardhatToken.allowance(owner.address, addr1.address)).to.equal(0);
         });
 
@@ -240,9 +275,11 @@ describe("AlphaCoin42 contract", function () {
 
         it("Should allow transferFrom when approved", async function () {
             const { hardhatToken, owner, addr1, addr2 } = await loadFixture(deployTokenFixture);
+            const initialAmount = await hardhatToken.balanceOf(addr2.address);
+            const amount = BigInt(100);
             await hardhatToken.approve(addr1.address, 200);
-            await hardhatToken.connect(addr1).transferFrom(owner.address, addr2.address, 100);
-            expect(await hardhatToken.balanceOf(addr2.address)).to.equal(100);
+            await hardhatToken.connect(addr1).transferFrom(owner.address, addr2.address, amount);
+            expect(await hardhatToken.balanceOf(addr2.address)).to.equal(initialAmount + amount);
         });
 
         it("Should decrease allowance on transferFrom", async function () {
