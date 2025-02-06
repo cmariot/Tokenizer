@@ -267,9 +267,10 @@ describe("AlphaCoin42 contract", function () {
             expect(await hardhatToken.balanceOf(owner.address)).to.be.gt(0);
         });
 
-        it("Should not allow exceeding MaxUint256 in increaseAllowance", async function () {
+        it("Should not allow exceeding MaxUint96 in increaseAllowance", async function () {
             const { hardhatToken, owner, addr1 } = await loadFixture(deployTokenFixture);
-            await hardhatToken.approve(addr1.address, MaxUint256);
+            const MaxUint96 = BigInt(2) ** BigInt(96) - BigInt(1);
+            await hardhatToken.approve(addr1.address, MaxUint96);
             await expect(hardhatToken.increaseAllowance(addr1.address, 1))
                 .to.be.reverted;
         });
