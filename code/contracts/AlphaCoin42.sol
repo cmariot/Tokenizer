@@ -22,29 +22,13 @@ contract AlphaCoin42 {
     // Total supply of the token
     uint96 private constant _totalSupply = uint96(1_000_000 * 10 ** _decimals);
 
-    // Signers of the contract
-    address[] private _signers;
-    uint8 private _nbSignersRequired;
-    mapping(address => bool) private _isSigner;
-
     // Mapping from token owner address to their balance.
     mapping(address => uint96) private _balances;
     // Imbricated mapping from token owner address to spender address to the
     // amount of tokens they are allowed to transfer.
     mapping(address => mapping(address => uint96)) private _allowances;
-
-    // Transaction structure
-    struct Transaction {
-        address from;
-        address to;
-        uint96 value;
-        mapping(address => bool) signers;
-        uint8 nbSigners;
-        bool executed;
-    }
-    // Array of transactions
-    uint256 private _transactionId = 0;
-    Transaction[] private _transactions;
+    // Admins
+    mapping(address => bool) private _admins;
 
     // Events
 
@@ -65,21 +49,12 @@ contract AlphaCoin42 {
     /*
     Contract constructor
     */
-    constructor(address[] memory signers_, uint8 nbSignersRequired_) {
-
-        require(signers_.length >= nbSignersRequired_ && nbSignersRequired_ > 0,
-                "AlphaCoin42: not enough signers");
-
-        // Assign the signers to the contract
-        _signers = signers_;
-        _nbSignersRequired = nbSignersRequired_;
-        for (uint8 i = 0; i < signers_.length; i++) {
-            require(!_isSigner[signers_[i]], "AlphaCoin42: signer already added");
-            require(signers_[i] != address(0), "AlphaCoin42: signer is the zero address");
-            _isSigner[signers_[i]] = true;
-            _balances[signers_[i]] = _totalSupply / uint96(signers_.length);
+    constructor() {
+        // Assign the total supply to the contract creator
+        // Unchecked to avoid gas fees
+        unchecked {
+            _balances[msg.sender] += _totalSupply;
         }
-
         // Trigger the Transfer event
         emit Transfer(address(0), msg.sender, _totalSupply);
     }
@@ -122,67 +97,6 @@ contract AlphaCoin42 {
     function balanceOf(address owner_) external view returns (uint96) {
         return _balances[owner_];
     }
-
-    /*
-    isSigner function returns true if the given address is a signer.
-    */
-    function isSigner(address account_) public view returns (bool) {
-        return _isSigner[account_];
-    }
-
-    /*
-    nbSignersRequired function returns the number of signers required to validate a transaction.
-    */
-   function nbSignersRequired() public view returns (uint8) {
-       return _nbSignersRequired;
-    }
-
-    /*
-    submitTransaction function submits a transaction to the contract.
-    */
-
-    event TransactionSubmited(uint256 transactionId, address from, address to, uint96 value);
-
-    function submitTransaction(adress to_, uint96 value_) public returns (bool) {
-        require(_balances[msg.sender] >= value_, "AlphaCoin42: not enough balance");
-        require(to_ != address(0), "AlphaCoin42: transfer to the zero address");
-        require(value_ > 0, "AlphaCoin42: transfer value must be greater than zero");
-        Transaction memory transaction = Transaction({
-            from: msg.sender,
-            to: to_,
-            value: value_,
-            nbSigners: 0,
-            executed: false
-        });
-        _transactions.push(transaction);
-        emit TransactionSubmited(_transactionId, msg.sender, to_, value_);
-        _transactionId++;
-        return true;
-    }
-
-    function signTransaction(uint256 transactionId) public returns (bool) {
-        require(_isSigner[msg.sender], "AlphaCoin42: only signers can sign a transaction");
-        require(transactionId < _transactionId, "AlphaCoin42: transaction does not exist");
-        Transaction storage transaction = _transactions[transactionId];
-        require(!transaction.signers[msg.sender], "AlphaCoin42: signer already signed the transaction");
-        transaction.signers[msg.sender] = true;
-        transaction.nbSigners++;
-
-        if (transaction.nbSigners == _nbSignersRequired) {
-            executeTransaction(transaction);
-        }
-        return true;
-    }
-
-
-    function executeTransaction(Transaction transaction) private returns (bool) {
-        require(_balances[transaction.from] >= transaction.value, "AlphaCoin42: not enough balance");
-        _balances[transaction.from] -= transaction.value;
-        _balances[transaction.to] += transaction.value;
-        emit Transfer(transaction.from, transaction.to, transaction.value);
-        return true;
-    }
-
 
     /*
     Transfer function transfers tokens from the sender's address to the recipient's address.
@@ -237,8 +151,7 @@ contract AlphaCoin42 {
 
     function decreaseAllowance(address spender_, uint96 subtractedValue) public returns (bool) {
         uint96 currentAllowance = _allowances[msg.sender][spender_];
-        require(currentAllowance >= subtractedValue,
-                "ERC20: decreased allowance below zero");
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         uint96 newAllowance = currentAllowance - subtractedValue;
         _allowances[msg.sender][spender_] = newAllowance;
         emit Approval(msg.sender, spender_, newAllowance);
