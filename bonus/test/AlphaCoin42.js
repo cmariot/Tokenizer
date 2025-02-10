@@ -76,20 +76,20 @@ describe("AlphaCoin42 contract", function () {
         it("Should submit transfer", async function () {
 
             const { hardhatToken, owner, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
             const initialBalanceOwner = await hardhatToken.balanceOf(owner.address);
             const initialBalanceAddr2 = await hardhatToken.balanceOf(addr2.address);
 
+            // Submit a transfer of 100 tokens from the owner to addr2
             await hardhatToken.submitTransfer(addr2.address, 100);
+
+            // A transfer event should be emitted
             const transferEvents = await hardhatToken.queryFilter("TransferSubmitted");
             expect(transferEvents.length).to.equal(1);
             const event = transferEvents[0];
-            console.error(event);
-            const transactionId = BigInt(event.args._transactions_id);
+            const transactionId = parseInt(event.args.transactions_id.toString());
 
-            console.log("Type of transactionId", typeof transactionId);
-
-            console.log('transactionId', transactionId);
-
+            // The balance of the owner and the addr2 should not change yet
             const nextBalanceOwner = await hardhatToken.balanceOf(owner.address);
             const nextBalanceAddr2 = await hardhatToken.balanceOf(addr2.address);
 
@@ -100,21 +100,43 @@ describe("AlphaCoin42 contract", function () {
             // owner and addr1 are signers
             expect(await hardhatToken.isSigner(owner.address)).to.be.true;
             expect(await hardhatToken.isSigner(addr1.address)).to.be.true;
+
             // addr2 is not a signer
             expect(await hardhatToken.isSigner(addr2.address)).to.be.false;
 
             // Sign the transaction with as the owner
             await hardhatToken.connect(owner).signTransfer(transactionId);
-            console.error('owner signed');
             // Sign the transaction with as the addr1
             await hardhatToken.connect(addr1).signTransfer(transactionId);
 
             // The transaction should be executed
             const newBalanceAddr2 = await hardhatToken.balanceOf(addr2.address);
-            console.error(newBalanceAddr2);
+            // console.error(newBalanceAddr2);
 
             // The addr2 balance should be increased by 100
-            // expect(newBalanceAddr2).to.equal(BigInt(initialBalanceAddr2) + BigInt(100));
+            expect(newBalanceAddr2).to.equal(BigInt(initialBalanceAddr2) + BigInt(100));
+        });
+
+        it("A non signer should not be abble to sign a transaction", async function () {
+
+            const { hardhatToken, owner, addr1, addr2 } = await loadFixture(deployTokenFixture);
+
+            // Submit a transfer of 100 tokens from the owner to addr2
+            await hardhatToken.submitTransfer(addr2.address, 100);
+
+            // A transfer event should be emitted
+            const transferEvents = await hardhatToken.queryFilter("TransferSubmitted");
+            expect(transferEvents.length).to.equal(1);
+            const event = transferEvents[0];
+            const transactionId = parseInt(event.args.transactions_id.toString());
+
+            // addr2 is not a signer
+            expect(await hardhatToken.isSigner(addr2.address)).to.be.false;
+
+            // Try to sign the transaction with addr2
+            const addr2_ = await hardhatToken.connect(addr2);
+            expect(addr2_.signTransfer(transactionId)).to.be.revertedWith("ERC20: you are not a signer");
+
         });
 
     });
