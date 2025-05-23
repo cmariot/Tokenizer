@@ -1,48 +1,69 @@
-# Tokenizer : Build and deploy a token on Ethereum blockchain
+# SUDO42 Token Project
 
+## Présentation
 
-- Name of the token : Coin42
-- Blockchain : Sepolia (Ethereum testnet)
-- Standard : ERC-20
+SUDO42 est un token ERC-20 déployé sur le réseau Sepolia. Il a été conçu dans le cadre du projet Tokenizer de l'ecole 42 pour illustrer le fonctionnement d'un token standard. Le nom du token est **SUDO42** et son symbole est **SUDO**. L'offre totale est de 1 000 000 tokens avec 18 décimales.
 
+## Fonctionnalités principales
 
-## Repository structure
+- Implémentation complète du standard ERC-20 (transfert, approbation, allowance, etc.)
+- Attribution de l'intégralité de l'offre initiale au créateur du contrat
+- Tests unitaires pour valider le comportement du token
+- Déploiement automatisé via Hardhat Ignition
 
-```bash
-.
-├── code
-│   ├── contracts
-│   ├── package.json
-│   └── scripts
-├── deployment
-├── documentation
-└── README.md
-```
-
-The code folder contains the files used to create the token.
-The deployment folder contains the files used to deploy the token on the blockchain.
-There is also a documentation folder that contains the documentation of the project.
-
-
-## Token's code
-
-The development environment is managed by yarn.
-The token's code is written in Solidity, a language used to write smart contracts on the Ethereum blockchain. The code is located in the contracts folder.
-
-```solidity
-
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";  // OpenZeppelin package contains implementation of the ERC 20 standard, which our NFT smart contract will inherit
-
-contract Coin42 is ERC20 {
-    uint constant _initial_supply = 100 * (10**18);  // setting variable for how many of your own tokens are initially put into your wallet, feel free to edit the first number but make sure to leave the second number because we want to make sure our supply has 18 decimals
-
-    /* ERC 20 constructor takes in 2 strings, feel free to change the first string to the name of your token name, and the second string to the corresponding symbol for your custom token name */
-    constructor() ERC20("Coin42", "42C") public {
-        _mint(msg.sender, _initial_supply);
-    }
-}
+## Structure du projet
 
 ```
+code/
+  contracts/SUDO42.sol        # Contrat du token SUDO42
+  test/SUDO42.js              # Tests unitaires du token
+  ignition/modules/SUDO42.js  # Module de déploiement Ignition
+  ...
+Makefile                      # Commandes pour compiler, tester et déployer
+```
+
+## Prérequis
+- Node.js
+- Yarn
+- Les variables d'environnement ALCHEMY_API_KEY (pour l'endpoint RPC) et SEPOLIA_PRIVATE_KEY (pour la clé privée du compte déployeur) doivent être définies. Vous pouvez les définir dans votre terminal ou dans un fichier `.env` :
+
+```sh
+export ALCHEMY_API_KEY=your_alchemy_api_key
+export SEPOLIA_PRIVATE_KEY=your_sepolia_private_key
+```
+
+## Installation
+1. Clonez le dépôt et placez-vous dans le dossier `code` :
+   ```sh
+   cd code
+   yarn install
+   ```
+
+2. Configurez vos variables d'environnement (clé privée, endpoint RPC, etc.) dans `hardhat.config.js` ou via un fichier `.env` si nécessaire.
+
+## Utilisation
+Depuis la racine du projet :
+
+- **Compiler le contrat :**
+  ```sh
+  make compile
+  ```
+
+- **Lancer les tests :**
+  ```sh
+  make test
+  ```
+
+- **Déployer sur Sepolia :**
+  ```sh
+  make deploy
+  ```
+  > Le déploiement utilise Hardhat Ignition et le module `SUDO42.js`.
+
+- **Nettoyer le projet :**
+  ```sh
+  make clean
+  ```
+
+## Auteur
+Projet réalisé par cmariot dans le cadre de 42.

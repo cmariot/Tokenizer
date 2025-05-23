@@ -1,26 +1,25 @@
 const { expect } = require("chai");
 const { loadFixture } = require("@nomicfoundation/hardhat-toolbox/network-helpers");
-const { MaxUint256 } = require("ethers");
 
-describe("AlphaCoin42 contract", function () {
+describe("SUDO42 contract", function () {
 
     async function deployTokenFixture() {
         const [owner, addr1, addr2] = await ethers.getSigners();
-        const hardhatToken = await ethers.deployContract("AlphaCoin42");
+        const hardhatToken = await ethers.deployContract("SUDO42");
         await hardhatToken.waitForDeployment();
         return { hardhatToken, owner, addr1, addr2 };
     }
 
     describe("Construction", function () {
 
-        it("Should have 'AlphaCoin42' as name", async function () {
+        it("Should have 'SUDO42' as name", async function () {
             const { hardhatToken } = await loadFixture(deployTokenFixture);
-            expect(await hardhatToken.name()).to.equal("AlphaCoin42");
+            expect(await hardhatToken.name()).to.equal("SUDO42");
         });
 
-        it("Should have 'AC42' as symbol", async function () {
+        it("Should have 'SUDO' as symbol", async function () {
             const { hardhatToken } = await loadFixture(deployTokenFixture);
-            expect(await hardhatToken.symbol()).to.equal("AC42");
+            expect(await hardhatToken.symbol()).to.equal("SUDO");
         });
 
         it("Should have 18 decimals", async function () {

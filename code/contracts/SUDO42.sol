@@ -9,14 +9,14 @@ pragma solidity ^0.8.20;
 // https://eips.ethereum.org/EIPS/eip-20
 
 
-contract AlphaCoin42 {
+contract SUDO42 {
 
     // State variables
 
     // Name of the token
-    string private constant _name = "AlphaCoin42";
+    string private constant _name = "SUDO42";
     // Symbol of the token
-    string private constant _symbol = "AC42";
+    string private constant _symbol = "SUDO";
     // Decimals of the token
     uint8 private constant _decimals = 18;
     // Total supply of the token
@@ -60,14 +60,14 @@ contract AlphaCoin42 {
     }
 
     /*
-    Returns the name of the token - e.g. "AlphaCoin42".
+    Returns the name of the token - e.g. "SUDO42".
     */
     function name() public pure returns (string memory) {
         return _name;
     }
 
     /*
-    Returns the symbol of the token. e.g. "AC42".
+    Returns the symbol of the token. e.g. "SUDO".
     */
     function symbol() public pure returns (string memory) {
         return _symbol;

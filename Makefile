@@ -13,7 +13,7 @@ test:
 	cd $(CODE_DIR) && yarn hardhat test
 
 deploy:
-	cd $(CODE_DIR) && yarn hardhat ignition deploy ./ignition/modules/Coin42.js --network sepolia
+	cd $(CODE_DIR) && yarn hardhat ignition deploy ./ignition/modules/SUDO42.js --network sepolia
 
 clean:
 	rm -rf $(CODE_DIR)/artifacts $(BONUS_DIR)/artifacts
