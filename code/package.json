@@ -1,39 +1,22 @@
 {
-  "name": "sudo42",
+  "name": "code",
   "version": "1.0.0",
-  "description": "A token created for the 42 project Tokenizer",
   "main": "index.js",
-  "repository": "https://github.com/cmariot/Tokenizer",
-  "author": "cmariot",
-  "license": "MIT",
-  "dependencies": {
-    "@openzeppelin/contracts": "^5.3.0"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
   "devDependencies": {
-    "@nomicfoundation/hardhat-chai-matchers": "^2.0.8",
-    "@nomicfoundation/hardhat-ethers": "^3.0.8",
-    "@nomicfoundation/hardhat-ignition": "^0.15.11",
-    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.11",
-    "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "@nomicfoundation/hardhat-verify": "^2.0.13",
-    "@typechain/ethers-v6": "^0.5.1",
-    "@typechain/hardhat": "^9.1.0",
-    "@types/chai": "^5.2.2",
-    "@types/mocha": "^10.0.10",
+    "@nomicfoundation/hardhat-ignition": "^3.0.0-next.11",
+    "@nomicfoundation/hardhat-toolbox-viem": "^4.0.0-next.11",
     "@types/node": "^22.15.21",
-    "chai": "^5.2.0",
-    "ethers": "^6.14.1",
-    "hardhat": "^2.24.0",
-    "hardhat-gas-reporter": "^2.2.3",
-    "solidity-coverage": "^0.8.16",
-    "ts-node": "^10.9.2",
-    "typechain": "^8.3.2",
-    "typescript": "^5.8.3"
-  },
-  "resolutions": {
-    "elliptic": ">=6.5.7",
-    "cookie": ">=0.7.0",
-    "ws": ">=8.17.1"
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.0.0-next.11",
+    "typescript": "~5.5.0",
+    "viem": "^2.30.1"
   }
 }

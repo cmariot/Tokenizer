@@ -1,0 +1,41 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "c9ed13367c53d454f470b582ffc6763ee93e318b",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "publicSourceNameMap": {
+    "contracts/Niel42.sol": "contracts/Niel42.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "evmVersion": "cancun",
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
+        }
+      },
+      "remappings": [
+        "forge-std/=npm/forge-std@1.9.4/src/"
+      ]
+    },
+    "sources": {
+      "contracts/Niel42.sol": {
+        "content": "//SPDX-License-Identifier: UNLICENSED\n\n// Solidity files have to start with this pragma.\n// It will be used by the Solidity compiler to validate its version.\npragma solidity ^0.8.28;\n\n\n// ERC-20 Token Standard Interface :\n// https://eips.ethereum.org/EIPS/eip-20\n\n\ncontract Niel42 {\n\n    // State variables\n\n    // Name of the token\n    string private constant _name = \"Niel42\";\n    // Symbol of the token\n    string private constant _symbol = \"N42\";\n    // Decimals of the token\n    uint8 private constant _decimals = 18;\n    // Total supply of the token\n    uint96 private constant _totalSupply = uint96(1_000_000 * 10 ** _decimals);\n\n    // Mapping from token owner address to their balance.\n    mapping(address => uint96) private _balances;\n    // Imbricated mapping from token owner address to spender address to the\n    // amount of tokens they are allowed to transfer.\n    mapping(address => mapping(address => uint96)) private _allowances;\n    // Admins\n    mapping(address => bool) private _admins;\n\n    // Events\n\n    /*\n    Transfer event\n    MUST trigger when tokens are transferred, including zero value transfers.\n    A token contract which creates new tokens SHOULD trigger a Transfer event\n    with the _from address set to 0x0 when tokens are created.\n    */\n    event Transfer(address indexed _from, address indexed _to, uint96 _value);\n\n    /*\n    Approval event\n    MUST trigger on any successful call to approve(address _spender, uint96 _value).\n    */\n    event Approval(address indexed _owner, address indexed _spender, uint96 _value);\n\n    /*\n    Contract constructor\n    */\n    constructor() {\n        // Assign the total supply to the contract creator\n        // Unchecked to avoid gas fees\n        unchecked {\n            _balances[msg.sender] += _totalSupply;\n        }\n        // Trigger the Transfer event\n        emit Transfer(address(0), msg.sender, _totalSupply);\n    }\n\n    /*\n    Returns the name of the token - e.g. \"NIEL42\".\n    */\n    function name() public pure returns (string memory) {\n        return _name;\n    }\n\n    /*\n    Returns the symbol of the token. e.g. \"NIEL\".\n    */\n    function symbol() public pure returns (string memory) {\n        return _symbol;\n    }\n\n    /*\n    Returns the number of decimals the token uses.\n    For example, suppose I'm creating a token called \"dollars,\"\n    and I want people to be able to transfer an amount like $1.25.\n    To support that, I'll use a decimals value of 2.\n    */\n    function decimals() public pure returns (uint8) {\n        return _decimals;\n    }\n\n    /*\n    Returns the total token supply.\n    The total token supply is the number of tokens available to the public.\n    */\n    function totalSupply() public pure returns (uint96) {\n        return _totalSupply;\n    }\n\n    /*\n    balanceOf function returns the balance of the given address.\n    */\n    function balanceOf(address owner_) external view returns (uint96) {\n        return _balances[owner_];\n    }\n\n    /*\n    Transfer function transfers tokens from the sender's address to the recipient's address.\n    */\n    function transfer(address to_, uint96 value_) public returns (bool success) {\n        require(to_ != address(0), \"ERC20: transfer to the zero address\");\n        require(_balances[msg.sender] >= value_, \"ERC20: transfer amount exceeds balance\");\n        _balances[msg.sender] -= value_;\n        _balances[to_] += value_;\n        emit Transfer(msg.sender, to_, value_);\n        return true;\n    }\n\n    /*\n    allowance\n    Returns the amount which spender_ is still allowed to withdraw from owner_.\n    */\n    function allowance(address owner_, address spender_) public view returns (uint96) {\n        return _allowances[owner_][spender_];\n    }\n\n    /*\n    approve\n    Allows _spender to withdraw from your account multiple times, up to the\n    _value amount. If this function is called again it overwrites the\n    current allowance with _value.\n    NOTE: To prevent attack vectors like the one described here and discussed\n    here, clients SHOULD make sure to create user interfaces in such a way\n    that they set the allowance first to 0 before setting it to another value\n    for the same spender. THOUGH The contract itself shouldn’t enforce it,\n    to allow backwards compatibility with contracts deployed before\n    */\n    function approve(address spender_, uint96 value_) public returns (bool success) {\n        require(spender_ != address(0), \"ERC20: approve to the zero address\");\n        require(_allowances[msg.sender][spender_] == 0 || value_ == 0,\n                \"ERC20: must first set allowance to zero\");\n        _allowances[msg.sender][spender_] = value_;\n        emit Approval(msg.sender, spender_, value_);\n        return true;\n    }\n\n    /*\n    Pour eviter deux calls à approve, on peut utiliser les fonctions\n    increaseAllowance et decreaseAllowance\n    */\n    function increaseAllowance(address spender_, uint96 addedValue) public returns (bool) {\n        uint96 newAllowance = _allowances[msg.sender][spender_] + addedValue;\n        _allowances[msg.sender][spender_] = newAllowance;\n        emit Approval(msg.sender, spender_, newAllowance);\n        return true;\n    }\n\n    function decreaseAllowance(address spender_, uint96 subtractedValue) public returns (bool) {\n        uint96 currentAllowance = _allowances[msg.sender][spender_];\n        require(currentAllowance >= subtractedValue, \"ERC20: decreased allowance below zero\");\n        uint96 newAllowance = currentAllowance - subtractedValue;\n        _allowances[msg.sender][spender_] = newAllowance;\n        emit Approval(msg.sender, spender_, newAllowance);\n        return true;\n    }\n\n    /*\n    transferFrom:\n    Transfers _value amount of tokens from address _from to address _to, and MUST fire the Transfer event.\n    The transferFrom method is used for a withdraw workflow, allowing\n    contracts to transfer tokens on your behalf. This can be used for\n    example to allow a contract to transfer tokens on your behalf and/or to\n    charge fees in sub-currencies.\n    The function SHOULD throw unless the _from account has deliberately\n    authorized the sender of the message via some mechanism.\n    Note Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event.\n    */\n    function transferFrom(address from_, address to_, uint96 value_) public returns (bool success) {\n        require(value_ <= _balances[from_], \"ERC20: transfer amount exceeds balance\");\n        require(value_ <= _allowances[from_][msg.sender], \"ERC20: insufficient allowance\");\n        require(to_ != address(0), \"ERC20: transfer to the zero address\");\n\n        _balances[from_] -= value_;\n        _balances[to_] += value_;\n        _allowances[from_][msg.sender] -= value_;\n\n        emit Transfer(from_, to_, value_);\n\n        return true;\n    }\n\n}"
+      }
+    }
+  }
+}

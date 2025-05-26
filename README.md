@@ -1,69 +1,153 @@
-# SUDO42 Token Project
+# 🪙 Tokenizer – NIEL42
 
-## Présentation
+## 🔰 Introduction
 
-SUDO42 est un token ERC-20 déployé sur le réseau Sepolia. Il a été conçu dans le cadre du projet Tokenizer de l'ecole 42 pour illustrer le fonctionnement d'un token standard. Le nom du token est **SUDO42** et son symbole est **SUDO**. L'offre totale est de 1 000 000 tokens avec 18 décimales.
+L'objectif de ce projet est de créer un token sur la blockchain.
 
-## Fonctionnalités principales
+Ce guide vous accompagnera à travers les étapes de création, déploiement et interaction avec un token ERC-20 sur la blockchain Sepolia, un réseau de test Ethereum.
 
-- Implémentation complète du standard ERC-20 (transfert, approbation, allowance, etc.)
-- Attribution de l'intégralité de l'offre initiale au créateur du contrat
-- Tests unitaires pour valider le comportement du token
-- Déploiement automatisé via Hardhat Ignition
+## ⚙️ Prérequis
 
-## Structure du projet
+Environnement nécessaire :
 
+- Node.js v22 ou supérieur
+    ```zsh
+    node -v
+    ```
+
+- npm v10 ou supérieur
+    ```zsh
+    npm -v
+    ```
+
+- Compte MetaMask configuré sur le réseau Sepolia
+
+- Accès à des fonds de test Sepolia (via faucet)
+
+
+## Mise en place de l'environnement
+
+Pour developper et déployer le token, nous allons utiliser Hardhat, un environnement de développement pour Ethereum.
+
+Cet environnement nous permettra de compiler, tester et déployer notre smart contract de manière efficace.
+
+```zsh
+mkdir code
+cd code
+npm init -y
+npx hardhat@next --init
 ```
-code/
-  contracts/SUDO42.sol        # Contrat du token SUDO42
-  test/SUDO42.js              # Tests unitaires du token
-  ignition/modules/SUDO42.js  # Module de déploiement Ignition
-  ...
-Makefile                      # Commandes pour compiler, tester et déployer
+
+Acceptez les options par défaut pour initialiser le projet.
+
+On arrive à un projet avec la structure suivante :
+
+```zsh
+.
+├── contracts
+│   └── Niel42.sol                  // Code du contrat intelligent
+├── hardhat.config.ts               // Fichier de configuration Hardhat
+├── ignition
+│   └── modules
+│       └── Niel42.ts               // Module de déploiement
+├── package.json                    // Dépendances du projet
+├── README.md
+├── scripts
+│   ├── check-predeploy.ts
+│   └── send-op-tx.ts
+├── test
+│   └── Niel42.ts                   // Tests unitaires
+└── tsconfig.json                   // Configuration TypeScript
 ```
 
-## Prérequis
-- Node.js
-- Yarn
-- Les variables d'environnement ALCHEMY_API_KEY (pour l'endpoint RPC) et SEPOLIA_PRIVATE_KEY (pour la clé privée du compte déployeur) doivent être définies. Vous pouvez les définir dans votre terminal ou dans un fichier `.env` :
 
-```sh
-export ALCHEMY_API_KEY=your_alchemy_api_key
-export SEPOLIA_PRIVATE_KEY=your_sepolia_private_key
-```
 
-## Installation
-1. Clonez le dépôt et placez-vous dans le dossier `code` :
-   ```sh
-   cd code
-   yarn install
-   ```
 
-2. Configurez vos variables d'environnement (clé privée, endpoint RPC, etc.) dans `hardhat.config.js` ou via un fichier `.env` si nécessaire.
 
-## Utilisation
-Depuis la racine du projet :
 
-- **Compiler le contrat :**
-  ```sh
-  make compile
-  ```
 
-- **Lancer les tests :**
-  ```sh
-  make test
-  ```
+## 🧱 Structure du Token
 
-- **Déployer sur Sepolia :**
-  ```sh
-  make deploy
-  ```
-  > Le déploiement utilise Hardhat Ignition et le module `SUDO42.js`.
+Type de token (ex: ERC-20, ERC-721…)
 
-- **Nettoyer le projet :**
-  ```sh
-  make clean
-  ```
+Nom du token (ex: MyToken)
 
-## Auteur
-Projet réalisé par cmariot dans le cadre de 42.
+Symbole (ex: MYT)
+
+Nombre de décimales (ex: 18)
+
+Supply initial
+
+Mintable / Burnable / Pausable ?
+
+Permissions (Owner, minter…)
+
+## 🛠️ Étapes de Création
+
+Rédaction du contrat intelligent
+
+Compilation
+
+Déploiement sur un réseau de test
+
+Vérification via block explorer (Etherscan / BscScan)
+
+Interaction avec le contrat (via Remix, scripts ou frontend)
+
+## 🧪 Test et Validation
+
+Tests unitaires (si existants)
+
+Vérification du bon comportement :
+
+    Transfert de tokens
+
+    Lecture du solde
+
+    Gestion des erreurs
+
+## 🧾 Vocabulaire Clé (Définitions simples)
+
+Token : Actif numérique sur la blockchain.
+
+Smart Contract : Programme auto-exécutable déployé sur la blockchain.
+
+ERC-20 : Standard pour les tokens fongibles sur Ethereum.
+
+Mint : Création de nouveaux tokens.
+
+Burn : Destruction de tokens.
+
+Blockchain : Registre distribué, transparent et immuable.
+
+## 🔒 Sécurité et Bonnes Pratiques
+
+Vérifier les accès et rôles
+
+Ne jamais exposer de clés privées
+
+Utiliser des bibliothèques éprouvées (OpenZeppelin)
+
+Faire auditer le contrat avant mise en production
+
+## 📡 Déploiement sur le Réseau Principal
+
+Préparer le contrat (vérifié et audité)
+
+Déployer sur le mainnet
+
+Ajouter le token dans MetaMask
+
+Communiquer l’adresse du contrat
+
+## 📎 Ressources utiles
+
+<!-- OpenZeppelin Docs -->
+
+<!-- Ethereum Docs -->
+
+<!-- Remix IDE -->
+
+[Hardhat](https://hardhat.org/)
+
+<!-- Etherscan Verification Guide -->

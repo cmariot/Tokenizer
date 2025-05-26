@@ -2,21 +2,21 @@
 
 // Solidity files have to start with this pragma.
 // It will be used by the Solidity compiler to validate its version.
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.28;
 
 
 // ERC-20 Token Standard Interface :
 // https://eips.ethereum.org/EIPS/eip-20
 
 
-contract SUDO42 {
+contract Niel42 {
 
     // State variables
 
     // Name of the token
-    string private constant _name = "SUDO42";
+    string private constant _name = "Niel42";
     // Symbol of the token
-    string private constant _symbol = "SUDO";
+    string private constant _symbol = "N42";
     // Decimals of the token
     uint8 private constant _decimals = 18;
     // Total supply of the token
@@ -60,14 +60,14 @@ contract SUDO42 {
     }
 
     /*
-    Returns the name of the token - e.g. "SUDO42".
+    Returns the name of the token - e.g. "NIEL42".
     */
     function name() public pure returns (string memory) {
         return _name;
     }
 
     /*
-    Returns the symbol of the token. e.g. "SUDO".
+    Returns the symbol of the token. e.g. "NIEL".
     */
     function symbol() public pure returns (string memory) {
         return _symbol;

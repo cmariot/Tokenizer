@@ -1,24 +1,29 @@
-CODE_DIR=./code
-BONUS_DIR=./bonus
+install:
+	@echo "Installing dependencies..."
+	@cd code && \
+		npm install
 
-all: yarn compile test deploy
+compile: install
+	@echo "Compiling smart contracts..."
+	@cd code && \
+		npx hardhat compile
 
-yarn:
-	cd $(CODE_DIR) && yarn
+deploy: compile
+	@echo "Deploying smart contracts..."
+	@cd code && \
+		npx hardhat ignition deploy ignition/modules/Niel42.ts --network sepolia
 
-compile:
-	cd $(CODE_DIR) && yarn hardhat compile
-
-test:
-	cd $(CODE_DIR) && yarn hardhat test
-
-deploy:
-	cd $(CODE_DIR) && yarn hardhat ignition deploy ./ignition/modules/SUDO42.js --network sepolia
+test: install
+	@echo "Running tests..."
+	@cd code && \
+		npx hardhat test test/Niel42.ts
 
 clean:
-	rm -rf $(CODE_DIR)/artifacts $(BONUS_DIR)/artifacts
-	rm -rf $(CODE_DIR)/cache $(BONUS_DIR)/cache
-	rm -rf $(CODE_DIR)/node_modules $(BONUS_DIR)/node_modules
-	rm -rf $(CODE_DIR)/yarn.lock $(BONUS_DIR)/yarn.lock
+	@echo "Cleaning up..."
+	@cd code && \
+		npx hardhat clean
+	@ rm -rf code/cache
 
-.PHONY: all yarn compile test deploy
+fclean: clean
+	@cd code && \
+	    rm -rf artifacts node_modules package-lock.json
