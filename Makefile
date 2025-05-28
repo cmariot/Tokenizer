@@ -18,7 +18,7 @@ test: install
 	@cd code && \
 		npx hardhat test test/Niel42.ts
 
-clean:
+clean: install
 	@echo "Cleaning up..."
 	@cd code && \
 		npx hardhat clean
@@ -26,4 +26,4 @@ clean:
 
 fclean: clean
 	@cd code && \
-	    rm -rf artifacts node_modules package-lock.json
+	    rm -rf artifacts node_modules package-lock.json ignition/deployments
