@@ -66,7 +66,7 @@ async function deployNiel42Fixture() {
   const owner = signers[0];
   const addr1 = signers[1];
   const addr2 = signers[2];
-  const deployment = await viem.deployContract("Niel42", [], { walletClient: owner });
+  const deployment = await viem.deployContract("Niel42Bonus", [], { walletClient: owner });
   const read = deployment.read;
   const write = deployment.write;
   return {
@@ -82,14 +82,14 @@ async function deployNiel42Fixture() {
 
 describe("Niel42 - Construction", async function () {
 
-  it("Should have 'Niel42' as name", async () => {
+  it("Should have 'Niel42Bonus' as name", async () => {
     const { read } = await deployNiel42Fixture();
-    assert.equal(await read.name(), "Niel42");
+    assert.equal(await read.name(), "Niel42Bonus");
   });
 
-  it("Should have 'N42' as symbol", async () => {
+  it("Should have 'N42B' as symbol", async () => {
     const { read } = await deployNiel42Fixture();
-    assert.equal(await read.symbol(), "N42");
+    assert.equal(await read.symbol(), "N42B");
   });
 
   it("Should have 18 decimals", async () => {

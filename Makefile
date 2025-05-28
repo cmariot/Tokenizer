@@ -25,4 +25,29 @@ fclean: clean
 	@echo "Full clean..."
 	@cd code && rm -rf artifacts node_modules package-lock.json ignition/deployments
 
-.PHONY: all install compile deploy test clean fclean
+install_bonus:
+	@echo "Installing bonus dependencies..."
+	@cd bonus && npm install
+
+compile_bonus:
+	@echo "Compiling bonus smart contracts..."
+	@cd bonus && npx hardhat compile
+
+deploy_bonus:
+	@echo "Deploying bonus smart contracts..."
+	@cd bonus && npx hardhat ignition deploy ignition/modules/Niel42.ts --network sepolia
+
+test_bonus:
+	@echo "Running bonus tests..."
+	@cd bonus && npx hardhat test test/Bonus42.ts
+
+clean_bonus:
+	@echo "Cleaning up bonus..."
+	@cd bonus && npx hardhat clean
+	@rm -rf bonus/cache
+
+fclean_bonus: clean_bonus
+	@echo "Full clean bonus..."
+	@cd bonus && rm -rf artifacts node_modules package-lock.json ignition/deployments
+
+.PHONY: all install compile deploy test clean fclean install_bonus compile_bonus deploy_bonus test_bonus clean_bonus fclean_bonus
