@@ -131,8 +131,8 @@ contract Niel42 {
     */
     function approve(address spender_, uint96 value_) public returns (bool success) {
         require(spender_ != address(0), "ERC20: approve to the zero address");
-        require(_allowances[msg.sender][spender_] == 0 || value_ == 0,
-                "ERC20: must first set allowance to zero");
+        // require(_allowances[msg.sender][spender_] == 0 || value_ == 0,
+        //         "ERC20: must first set allowance to zero");
         _allowances[msg.sender][spender_] = value_;
         emit Approval(msg.sender, spender_, value_);
         return true;

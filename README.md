@@ -25,22 +25,9 @@ Environnement nécessaire :
 - Accès à des fonds de test Sepolia (via faucet)
 
 
-## Mise en place de l'environnement
+## Structure du projet
 
-Pour developper et déployer le token, nous allons utiliser Hardhat, un environnement de développement pour Ethereum.
-
-Cet environnement nous permettra de compiler, tester et déployer notre smart contract de manière efficace.
-
-```zsh
-mkdir code
-cd code
-npm init -y
-npx hardhat@next --init
-```
-
-Acceptez les options par défaut pour initialiser le projet.
-
-On arrive à un projet avec la structure suivante :
+Voici la structure principale du projet :
 
 ```zsh
 .
@@ -52,9 +39,6 @@ On arrive à un projet avec la structure suivante :
 │       └── Niel42.ts               // Module de déploiement
 ├── package.json                    // Dépendances du projet
 ├── README.md
-├── scripts
-│   ├── check-predeploy.ts
-│   └── send-op-tx.ts
 ├── test
 │   └── Niel42.ts                   // Tests unitaires
 └── tsconfig.json                   // Configuration TypeScript
