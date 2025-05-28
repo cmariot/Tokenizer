@@ -59,14 +59,14 @@ import assert from "node:assert/strict";
 // Utilitaire pour initialiser le réseau et déployer le contrat à chaque test
 async function deployNiel42Fixture() {
   const connection = await network.connect();
-  // @ts-ignore
   const viem = connection.viem;
   const publicClient = await viem.getPublicClient();
   const signers = await viem.getWalletClients();
   const owner = signers[0];
   const addr1 = signers[1];
   const addr2 = signers[2];
-  const deployment = await viem.deployContract("Niel42", [], { account: owner.account });
+  // @ts-ignore
+  const deployment = await viem.deployContract("Niel42", [], { account: owner });
   const read = deployment.read;
   const write = deployment.write;
   return {
@@ -100,7 +100,7 @@ describe("Niel42 - Construction", async function () {
   it("Should have a total supply of 1,000,000 * 10^18", async () => {
     const { read } = await deployNiel42Fixture();
     const totalSupply = await read.totalSupply();
-    const expected = BigInt(1_000_000) * BigInt(10) ** BigInt(18);
+    const expected = BigInt("1000000") * (BigInt("10") ** BigInt("18"));
     assert.equal(totalSupply, expected);
   });
 
@@ -154,7 +154,7 @@ describe("Niel42 - transfer", async function () {
 
   it("Should transfer tokens between accounts", async () => {
     const { read, write, owner, addr1 } = await deployNiel42Fixture();
-    const amount = BigInt(10000);
+    const amount = BigInt("10000");
     await write.transfer([addr1.account.address, amount], { account: owner.account.address });
     const totalSupply = await read.totalSupply();
     const ownerBalance = await read.balanceOf([owner.account.address]);
@@ -165,7 +165,7 @@ describe("Niel42 - transfer", async function () {
 
   it("Should fail if the sender does not have enough tokens", async () => {
     const { write, owner, addr1 } = await deployNiel42Fixture();
-    const amount = BigInt(1_000_000) * 10n ** 18n + 1n;
+    const amount = BigInt("1000000") * (BigInt("10") ** BigInt("18")) + BigInt("1");
     await assert.rejects(
       write.transfer([addr1.account.address, amount], { account: owner.account.address }),
       /ERC20: transfer amount exceeds balance/
@@ -174,7 +174,7 @@ describe("Niel42 - transfer", async function () {
 
   it("Should fail if the recipient is the zero address", async () => {
     const { write, owner } = await deployNiel42Fixture();
-    const amount = 100n;
+    const amount = BigInt("100");
     await assert.rejects(
       write.transfer(["0x0000000000000000000000000000000000000000", amount], { account: owner.account.address }),
       /ERC20: transfer to the zero address/
@@ -183,7 +183,7 @@ describe("Niel42 - transfer", async function () {
 
   it("Transfers of 0 values MUST be treated as normal transfers and fire the Transfer event", async () => {
     const { deployment, write, owner, addr1, publicClient } = await deployNiel42Fixture();
-    const amount = 0n;
+    const amount = BigInt("0");
     await write.transfer([addr1.account.address, amount], { account: owner.account.address });
     const events = await publicClient.getContractEvents({
       address: deployment.address,
@@ -207,7 +207,7 @@ describe("Niel42 - allowance", async function () {
 
   it("Should return the allowance of the owner", async () => {
     const { read, write, owner, addr1 } = await deployNiel42Fixture();
-    const amount = 100n;
+    const amount = BigInt("100");
     await write.approve([addr1.account.address, amount], { account: owner.account.address });
     const allowance = await read.allowance([owner.account.address, addr1.account.address]);
     assert.equal(allowance, amount);
@@ -215,15 +215,15 @@ describe("Niel42 - allowance", async function () {
 
   it("Should return 0 for an address with no allowance", async () => {
     const { read, write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    const amount = 100n;
+    const amount = BigInt("100");
     await write.approve([addr1.account.address, amount], { account: owner.account.address });
     const allowance = await read.allowance([owner.account.address, addr2.account.address]);
-    assert.equal(allowance, 0n);
+    assert.equal(allowance, BigInt("0"));
   });
 
   it("Should allow setting allowance", async () => {
     const { read, write, owner, addr1 } = await deployNiel42Fixture();
-    const amount = 500n;
+    const amount = BigInt("500");
     await write.approve([addr1.account.address, amount], { account: owner.account.address });
     const allowance = await read.allowance([owner.account.address, addr1.account.address]);
     assert.equal(allowance, amount);
@@ -231,7 +231,7 @@ describe("Niel42 - allowance", async function () {
 
   it("Should fail if the spender is the zero address", async () => {
     const { write, owner } = await deployNiel42Fixture();
-    const amount = 100n;
+    const amount = BigInt("100");
     await assert.rejects(
       write.approve(["0x0000000000000000000000000000000000000000", amount], { account: owner.account.address }),
       /ERC20: approve to the zero address/
@@ -240,19 +240,19 @@ describe("Niel42 - allowance", async function () {
 
   it("Should allow spending within the approved allowance", async () => {
     const { read, write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    const amount = 200n;
+    const amount = BigInt("200");
     await write.approve([addr1.account.address, amount], { account: owner.account.address });
     await write.transferFrom([owner.account.address, addr2.account.address, amount], { account: addr1.account.address });
     assert.equal(await read.balanceOf([addr2.account.address]), amount);
-    assert.equal(await read.allowance([owner.account.address, addr1.account.address]), 0n);
+    assert.equal(await read.allowance([owner.account.address, addr1.account.address]), BigInt("0"));
   });
 
   it("Should fail if spender tries to spend more than allowed", async () => {
     const { write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    const amount = 100n;
+    const amount = BigInt("100");
     await write.approve([addr1.account.address, amount], { account: owner.account.address });
     await assert.rejects(
-      write.transferFrom([owner.account.address, addr2.account.address, amount + 1n], { account: addr1.account.address }),
+      write.transferFrom([owner.account.address, addr2.account.address, amount + BigInt("1")], { account: addr1.account.address }),
       /ERC20: insufficient allowance/
     );
   });
@@ -263,28 +263,28 @@ describe("Niel42 - Increase and Decrease Allowance", async function () {
 
   it("Should increase the allowance", async () => {
     const { read, write, owner, addr1 } = await deployNiel42Fixture();
-    const initialAmount = 200n;
+    const initialAmount = BigInt("200");
     await write.approve([addr1.account.address, initialAmount], { account: owner.account.address });
-    const increaseAmount = 100n;
+    const increaseAmount = BigInt("100");
     await write.increaseAllowance([addr1.account.address, increaseAmount], { account: owner.account.address });
     assert.equal(await read.allowance([owner.account.address, addr1.account.address]), initialAmount + increaseAmount);
   });
 
   it("Should decrease the allowance", async () => {
     const { read, write, owner, addr1 } = await deployNiel42Fixture();
-    const initialAmount = 300n;
+    const initialAmount = BigInt("300");
     await write.approve([addr1.account.address, initialAmount], { account: owner.account.address });
-    const decreaseAmount = 100n;
+    const decreaseAmount = BigInt("100");
     await write.decreaseAllowance([addr1.account.address, decreaseAmount], { account: owner.account.address });
     assert.equal(await read.allowance([owner.account.address, addr1.account.address]), initialAmount - decreaseAmount);
   });
 
   it("Should fail if trying to decrease allowance below zero", async () => {
     const { write, owner, addr1 } = await deployNiel42Fixture();
-    const initialAmount = 100n;
+    const initialAmount = BigInt("100");
     await write.approve([addr1.account.address, initialAmount], { account: owner.account.address });
     await assert.rejects(
-      write.decreaseAllowance([addr1.account.address, initialAmount + 1n], { account: owner.account.address }),
+      write.decreaseAllowance([addr1.account.address, initialAmount + BigInt("1")], { account: owner.account.address }),
       /ERC20: decreased allowance below zero/
     );
   });
@@ -295,23 +295,23 @@ describe("Niel42 - transferFrom", async function () {
 
   it("Should allow transferFrom when approved", async () => {
     const { read, write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    await write.approve([addr1.account.address, 200n], { account: owner.account.address });
-    await write.transferFrom([owner.account.address, addr2.account.address, 100n], { account: addr1.account.address });
-    assert.equal(await read.balanceOf([addr2.account.address]), 100n);
+    await write.approve([addr1.account.address, BigInt("200")], { account: owner.account.address });
+    await write.transferFrom([owner.account.address, addr2.account.address, BigInt("100")], { account: addr1.account.address });
+    assert.equal(await read.balanceOf([addr2.account.address]), BigInt("100"));
   });
 
   it("Should decrease allowance on transferFrom", async () => {
     const { read, write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    await write.approve([addr1.account.address, 200n], { account: owner.account.address });
-    await write.transferFrom([owner.account.address, addr2.account.address, 100n], { account: addr1.account.address });
-    assert.equal(await read.allowance([owner.account.address, addr1.account.address]), 100n);
+    await write.approve([addr1.account.address, BigInt("200")], { account: owner.account.address });
+    await write.transferFrom([owner.account.address, addr2.account.address, BigInt("100")], { account: addr1.account.address });
+    assert.equal(await read.allowance([owner.account.address, addr1.account.address]), BigInt("100"));
   });
 
   it("Should not allow transferFrom more than allowed", async () => {
     const { write, owner, addr1, addr2 } = await deployNiel42Fixture();
-    await write.approve([addr1.account.address, 100n], { account: owner.account.address });
+    await write.approve([addr1.account.address, BigInt("100")], { account: owner.account.address });
     await assert.rejects(
-      write.transferFrom([owner.account.address, addr2.account.address, 200n], { account: addr1.account.address }),
+      write.transferFrom([owner.account.address, addr2.account.address, BigInt("200")], { account: addr1.account.address }),
       /ERC20: insufficient allowance/
     );
   });
@@ -322,16 +322,16 @@ describe("Niel42 - Edge Cases", async function () {
 
   it("Should allow transferring to self", async () => {
     const { read, write, owner } = await deployNiel42Fixture();
-    await write.transfer([owner.account.address, 100n], { account: owner.account.address });
-    assert((await read.balanceOf([owner.account.address])) > 0n);
+    await write.transfer([owner.account.address, BigInt("100")], { account: owner.account.address });
+    assert((await read.balanceOf([owner.account.address])) > BigInt("0"));
   });
 
   it("Should not allow exceeding uint256_max in increaseAllowance", async () => {
     const { write, owner, addr1 } = await deployNiel42Fixture();
-    const Maxuint256 = 2n ** 256n - 1n;
+    const Maxuint256 = (BigInt("2") ** BigInt("256")) - BigInt("1");
     await write.approve([addr1.account.address, Maxuint256], { account: owner.account.address });
     await assert.rejects(
-      write.increaseAllowance([addr1.account.address, 1n], { account: owner.account.address }),
+      write.increaseAllowance([addr1.account.address, BigInt("1")], { account: owner.account.address }),
       /revert/
     );
   });

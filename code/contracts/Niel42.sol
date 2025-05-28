@@ -24,11 +24,10 @@ contract Niel42 {
 
     // Mapping from token owner address to their balance.
     mapping(address => uint256) private _balances;
+
     // Imbricated mapping from token owner address to spender address to the
     // amount of tokens they are allowed to transfer.
     mapping(address => mapping(address => uint256)) private _allowances;
-    // Admins
-    mapping(address => bool) private _admins;
 
     // Events
 
@@ -131,8 +130,6 @@ contract Niel42 {
     */
     function approve(address spender_, uint256 value_) public returns (bool success) {
         require(spender_ != address(0), "ERC20: approve to the zero address");
-        // require(_allowances[msg.sender][spender_] == 0 || value_ == 0,
-        //         "ERC20: must first set allowance to zero");
         _allowances[msg.sender][spender_] = value_;
         emit Approval(msg.sender, spender_, value_);
         return true;
@@ -174,9 +171,9 @@ contract Niel42 {
         require(value_ <= _allowances[from_][msg.sender], "ERC20: insufficient allowance");
         require(to_ != address(0), "ERC20: transfer to the zero address");
 
+        _allowances[from_][msg.sender] -= value_;
         _balances[from_] -= value_;
         _balances[to_] += value_;
-        _allowances[from_][msg.sender] -= value_;
 
         emit Transfer(from_, to_, value_);
 

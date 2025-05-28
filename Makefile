@@ -1,29 +1,28 @@
+all: install compile test deploy
+
 install:
 	@echo "Installing dependencies..."
-	@cd code && \
-		npm install
+	@cd code && npm install
 
-compile: install
+compile:
 	@echo "Compiling smart contracts..."
-	@cd code && \
-		npx hardhat compile
+	@cd code && npx hardhat compile
 
-deploy: compile
+deploy:
 	@echo "Deploying smart contracts..."
-	@cd code && \
-		npx hardhat ignition deploy ignition/modules/Niel42.ts --network sepolia
+	@cd code && npx hardhat ignition deploy ignition/modules/Niel42.ts --network sepolia
 
-test: install
+test:
 	@echo "Running tests..."
-	@cd code && \
-		npx hardhat test test/Niel42.ts
+	@cd code && npx hardhat test test/Niel42.ts
 
-clean: install
+clean:
 	@echo "Cleaning up..."
-	@cd code && \
-		npx hardhat clean
-	@ rm -rf code/cache
+	@cd code && npx hardhat clean
+	@rm -rf code/cache
 
 fclean: clean
-	@cd code && \
-	    rm -rf artifacts node_modules package-lock.json ignition/deployments
+	@echo "Full clean..."
+	@cd code && rm -rf artifacts node_modules package-lock.json ignition/deployments
+
+.PHONY: all install compile deploy test clean fclean
