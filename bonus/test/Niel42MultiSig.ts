@@ -344,4 +344,214 @@ describe("Niel42 - Edge Cases", async function () {
 
 });
 
+describe("Niel42MultiSig - Admins", function () {
+
+  it("Should add a new admin", async () => {
+    const { write, read, owner, addr1 } = await deployNiel42Fixture();
+    await write.addAdmin([addr1.account.address], { account: owner.account.address });
+    const isAdmin = await read.isAdmin([addr1.account.address]);
+    assert.equal(isAdmin, true);
+  });
+
+  it("Should not add an existing admin", async () => {
+    const { write, owner } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.addAdmin([owner.account.address], { account: owner.account.address }),
+      /Admin already exists/
+    );
+  });
+
+  it("Should remove an admin", async () => {
+    const { write, read, owner, addr1 } = await deployNiel42Fixture();
+    await write.addAdmin([addr1.account.address], { account: owner.account.address });
+    await write.removeAdmin([addr1.account.address], { account: owner.account.address });
+    const isAdmin = await read.isAdmin([addr1.account.address]);
+    assert.equal(isAdmin, false);
+  });
+
+  it("Should not remove the owner", async () => {
+    const { write, owner } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.removeAdmin([owner.account.address], { account: owner.account.address }),
+      /Cannot remove the owner/
+    );
+  });
+
+});
+
+
+describe("Niel42MultiSig - Proposals (Mint/Burn)", function () {
+
+  it("Should create a mint proposal", async () => {
+    const { deployment, write, read, owner, addr1, publicClient } = await deployNiel42Fixture();
+    const amount = BigInt("1000");
+    await write.createProposal([0, addr1.account.address, amount], { account: owner.account.address });
+    // Get the proposal ID from the event logs
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    const proposal = await read.getProposal([proposalId]);
+    assert.equal(proposal[0].toLowerCase(), owner.account.address.toLowerCase()); // proposer
+    assert.equal(proposal[1], 0); // ProposalType.Mint
+    assert.equal(proposal[2].toLowerCase(), addr1.account.address.toLowerCase()); // target
+    assert.equal(proposal[3], amount); // amount
+    assert.equal(proposal[4], 0); // state Pending
+    assert.equal(proposal[5], 0n); // approvals
+  });
+
+  it("Should create a burn proposal", async () => {
+    const { deployment, write, read, owner, addr1, publicClient } = await deployNiel42Fixture();
+    const amount = BigInt("1000");
+    await write.createProposal([1, addr1.account.address, amount], { account: owner.account.address });
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    const proposal = await read.getProposal([proposalId]);
+    assert.equal(proposal[1], 1); // ProposalType.Burn
+  });
+
+  it("Should not create a proposal with zero address", async () => {
+    const { write, owner } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.createProposal([0, "0x0000000000000000000000000000000000000000", 1000], { account: owner.account.address }),
+      /Invalid target address/
+    );
+  });
+
+  it("Should not create a proposal with zero amount", async () => {
+    const { write, owner, addr1 } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.createProposal([0, addr1.account.address, 0], { account: owner.account.address }),
+      /Amount must be greater than zero/
+    );
+  });
+
+  it("Should approve and execute a mint proposal", async () => {
+    const { deployment, write, read, owner, addr1, publicClient } = await deployNiel42Fixture();
+    // Set addr1 as an admin to approve the proposal
+    await write.addAdmin([addr1.account.address], { account: owner.account.address });
+    const amount = BigInt("1000");
+    const totalSupplyBefore = await read.totalSupply();
+    await write.createProposal([0, addr1.account.address, amount], { account: owner.account.address });
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    await write.approveProposal([proposalId], { account: owner.account.address });
+    await write.approveProposal([proposalId], { account: addr1.account.address });
+    const proposal = await read.getProposal([proposalId]);
+    assert.equal(proposal[4], 1); // state Approved
+    const balance = await read.balanceOf([addr1.account.address]);
+    assert.equal(balance, amount);
+    const totalSupplyAfter = await read.totalSupply();
+    assert.equal(totalSupplyAfter, totalSupplyBefore + amount);
+  });
+
+  it("Should approve and execute a burn proposal", async () => {
+    const { deployment, write, read, owner, addr1, publicClient } = await deployNiel42Fixture();
+    // Set addr1 as an admin to approve the proposal
+    await write.addAdmin([addr1.account.address], { account: owner.account.address });
+    const amount = BigInt("500");
+    const totalSupplyBefore = await read.totalSupply();
+    await write.createProposal([1, owner.account.address, amount], { account: owner.account.address });
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    await write.approveProposal([proposalId], { account: owner.account.address });
+    await write.approveProposal([proposalId], { account: addr1.account.address });
+    const proposal = await read.getProposal([proposalId]);
+    assert.equal(proposal[4], 1); // state Approved
+    const balanceAfter = await read.balanceOf([owner.account.address]);
+    assert.equal(balanceAfter, totalSupplyBefore - amount); // Owner should have less tokens
+    const totalSupplyAfter = await read.totalSupply();
+    assert.equal(totalSupplyAfter, totalSupplyBefore - amount); // Total supply should decrease
+  });
+
+  it("Should not approve twice by the same admin", async () => {
+    const { deployment, write, owner, addr1, publicClient } = await deployNiel42Fixture();
+    const amount = BigInt("1000");
+    await write.createProposal([0, addr1.account.address, amount], { account: owner.account.address });
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    await write.approveProposal([proposalId], { account: owner.account.address });
+    await assert.rejects(
+      write.approveProposal([proposalId], { account: owner.account.address }),
+      /Already approved by this admin/
+    );
+  });
+
+  it("Should cancel a proposal", async () => {
+    const { deployment, write, read, owner, addr1, publicClient } = await deployNiel42Fixture();
+    const amount = BigInt("1000");
+    await write.createProposal([0, addr1.account.address, amount], { account: owner.account.address });
+    const events = await publicClient.getContractEvents({
+      address: deployment.address,
+      abi: deployment.abi,
+      eventName: "ProposalCreated",
+      strict: true,
+    });
+    const proposalId = events[0].args.proposalId;
+    await write.cancelProposal([proposalId], { account: owner.account.address });
+    const proposal = await read.getProposal([proposalId]);
+    assert.equal(proposal[4], 2); // state Cancelled
+  });
+});
+
+describe("Niel42MultiSig - Parameters and Ownership", function () {
+
+  it("Should set proposalsToValidate", async () => {
+    const { write, read, owner } = await deployNiel42Fixture();
+    await write.setProposalsToValidate([42], { account: owner.account.address });
+    const proposalsToValidate = await read.proposalsToValidate();
+    assert.equal(proposalsToValidate, 42n);
+  });
+
+  it("Should not set proposalsToValidate to zero", async () => {
+    const { write, owner } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.setProposalsToValidate([0], { account: owner.account.address }),
+      /Proposals to validate must be greater than zero/
+    );
+  });
+
+  it("Should transfer ownership", async () => {
+    const { write, read, owner, addr1 } = await deployNiel42Fixture();
+    await write.transferOwnership([addr1.account.address], { account: owner.account.address });
+    const newOwner = await read.owner();
+    assert.equal(newOwner.toLowerCase(), addr1.account.address.toLowerCase());
+    const isAdmin = await read.isAdmin([addr1.account.address]);
+    assert.equal(isAdmin, true);
+    const isOwnerAdmin = await read.isAdmin([owner.account.address]);
+    assert.equal(isOwnerAdmin, true); // Owner should still be an admin
+  });
+
+  it("Should not transfer ownership to zero address", async () => {
+    const { write, owner } = await deployNiel42Fixture();
+    await assert.rejects(
+      write.transferOwnership(["0x0000000000000000000000000000000000000000"], { account: owner.account.address }),
+      /New owner is the zero address/
+    );
+  });
+
+});
 

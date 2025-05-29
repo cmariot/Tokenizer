@@ -45,7 +45,7 @@ contract Niel42MultiSig is Niel42 {
     uint256 private _proposalsToValidate;
 
     /*
-    Modifiers
+    Modifiers to restrict access to certain functions
     */
     modifier onlyOwner() {
         require(msg.sender == _owner, "Caller is not the owner");
@@ -336,13 +336,6 @@ contract Niel42MultiSig is Niel42 {
     event AdminAdded(address indexed admin);
     event ProposalCancelled(uint256 indexed proposalId, address indexed admin);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    /*
-    Function to get the list of admins
-    */
-    function getAdmins() public view returns (address[] memory) {
-        return _adminList;
-    }
 
     function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0), "New owner is the zero address");
