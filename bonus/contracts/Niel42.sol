@@ -19,11 +19,11 @@ contract Niel42 {
     string private constant _symbol = "N42";
     // Decimals of the token
     uint8 private constant _decimals = 18;
-    // Total supply of the token
-    uint256 private constant _totalSupply = uint256(1_000_000 * 10 ** _decimals);
+    // Total supply of the token (now mutable)
+    uint256 internal _totalSupply;
 
-    // Mapping from token owner address to their balance.
-    mapping(address => uint256) private _balances;
+    // Mapping from token owner address to their balance (now internal)
+    mapping(address => uint256) internal _balances;
 
     // Imbricated mapping from token owner address to spender address to the
     // amount of tokens they are allowed to transfer.
@@ -49,6 +49,8 @@ contract Niel42 {
     Contract constructor
     */
     constructor() {
+        // Set the initial total supply
+        _totalSupply = uint256(1_000_000 * 10 ** _decimals);
         // Assign the total supply to the contract creator
         // Unchecked to avoid gas fees
         unchecked {
@@ -86,7 +88,7 @@ contract Niel42 {
     Returns the total token supply.
     The total token supply is the number of tokens available to the public.
     */
-    function totalSupply() public pure returns (uint256) {
+    function totalSupply() public view returns (uint256) {
         return _totalSupply;
     }
 

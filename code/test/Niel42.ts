@@ -66,7 +66,7 @@ async function deployNiel42Fixture() {
   const owner = signers[0];
   const addr1 = signers[1];
   const addr2 = signers[2];
-  const deployment = await viem.deployContract("Niel42", [], { walletClient: owner });
+  const deployment = await viem.deployContract("Niel42", []);
   const read = deployment.read;
   const write = deployment.write;
   return {

@@ -61,14 +61,14 @@ contract Niel42 {
     /*
     Returns the name of the token - e.g. "NIEL42".
     */
-    function name() public pure returns (string memory) {
+    function name() public pure virtual returns (string memory) {
         return _name;
     }
 
     /*
     Returns the symbol of the token. e.g. "NIEL".
     */
-    function symbol() public pure returns (string memory) {
+    function symbol() public pure virtual returns (string memory) {
         return _symbol;
     }
 

@@ -25,6 +25,8 @@ fclean: clean
 	@echo "Full clean..."
 	@cd code && rm -rf artifacts node_modules package-lock.json ignition/deployments
 
+bonus: install_bonus compile_bonus test_bonus deploy_bonus
+
 install_bonus:
 	@echo "Installing bonus dependencies..."
 	@cd bonus && npm install
@@ -35,11 +37,11 @@ compile_bonus:
 
 deploy_bonus:
 	@echo "Deploying bonus smart contracts..."
-	@cd bonus && npx hardhat ignition deploy ignition/modules/Niel42.ts --network sepolia
+	@cd bonus && npx hardhat ignition deploy ignition/modules/Niel42MultiSig.ts --network sepolia
 
 test_bonus:
 	@echo "Running bonus tests..."
-	@cd bonus && npx hardhat test test/Bonus42.ts
+	@cd bonus && npx hardhat test test/Niel42MultiSig.ts
 
 clean_bonus:
 	@echo "Cleaning up bonus..."

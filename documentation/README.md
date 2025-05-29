@@ -116,3 +116,5 @@ Blockchain : Registre distribué, transparent et immuable.
 <!-- Sepolia Faucet -->
 - [Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
 
+<!-- Solidity Docs -->
+- [Solidity Docs](https://docs.soliditylang.org/en/v0.8.28/)
