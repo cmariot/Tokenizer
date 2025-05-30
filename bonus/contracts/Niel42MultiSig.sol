@@ -57,7 +57,6 @@ contract Niel42MultiSig is Niel42 {
         _;
     }
 
-
     /*
     Add an admin
     */
