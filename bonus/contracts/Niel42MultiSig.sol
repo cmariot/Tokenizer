@@ -11,6 +11,7 @@ pragma solidity ^0.8.28;
 // Import the Niel42 contract interface
 import "./Niel42.sol";
 
+// Niel42MultiSig inherits from Niel42
 contract Niel42MultiSig is Niel42 {
 
     // Name of the token
@@ -329,14 +330,41 @@ contract Niel42MultiSig is Niel42 {
     /*
     Events for multisig tracking
     */
-    event ProposalCreated(uint256 indexed proposalId, address indexed proposer, ProposalType proposalType, address indexed target, uint256 amount);
-    event ProposalApproved(uint256 indexed proposalId, address indexed admin);
-    event ProposalExecuted(uint256 indexed proposalId, ProposalType proposalType, address indexed target, uint256 amount);
-    event AdminRemoved(address indexed admin);
-    event AdminAdded(address indexed admin);
-    event ProposalCancelled(uint256 indexed proposalId, address indexed admin);
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event ProposalCreated(
+        uint256 indexed proposalId,
+        address indexed proposer,
+        ProposalType proposalType,
+        address indexed target,
+        uint256 amount
+    );
+    event ProposalApproved(
+        uint256 indexed proposalId,
+        address indexed admin
+    );
+    event ProposalExecuted(
+        uint256 indexed proposalId,
+        ProposalType proposalType,
+        address indexed target,
+        uint256 amount
+    );
+    event AdminRemoved(
+        address indexed admin
+    );
+    event AdminAdded(
+        address indexed admin
+    );
+    event ProposalCancelled(
+        uint256 indexed proposalId,
+        address indexed admin
+    );
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
+    /*
+    Change the owner
+    */
     function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0), "New owner is the zero address");
         require(newOwner != _owner, "New owner is already the owner");
@@ -350,6 +378,9 @@ contract Niel42MultiSig is Niel42 {
         emit OwnershipTransferred(previousOwner, newOwner);
     }
 
+    /*
+    Get the address of the owner
+    */
     function owner() public view returns (address) {
         return _owner;
     }

@@ -2,119 +2,147 @@
 
 ## 🔰 Introduction
 
-L'objectif de ce projet est de créer un token sur la blockchain.
+Ce projet a pour but de te faire découvrir le fonctionnement des tokens sur la blockchain Ethereum, à travers la création et le déploiement d’un token conforme au standard ERC-20. Même si tu n’as jamais utilisé la blockchain, ce guide t’accompagnera pas à pas.
 
-Ce guide vous accompagnera à travers les étapes de déploiement et d'interaction avec un token ERC-20 sur la blockchain Sepolia, un réseau de test Ethereum.
+---
+
+## 🌍 Qu’est-ce qu’un token ERC-20 ?
+
+Un token ERC-20 est un actif numérique standardisé sur la blockchain Ethereum. Il peut représenter de la monnaie, des points de fidélité, ou tout autre actif fongible. Les tokens ERC-20 sont compatibles avec de nombreux portefeuilles et applications.
+
+---
+
+## 🏗️ Les contrats intelligents du projet
+
+### 1. Contrat principal : `Niel42.sol`
+- **Type** : Token ERC-20 classique
+- **Fonctionnalités** :
+  - Détenir des tokens sur une adresse
+  - Transférer des tokens à d’autres utilisateurs
+  - Autoriser un tiers à dépenser des tokens pour soi (mécanisme d’approbation)
+- **Paramètres** :
+  - Nom : Niel42
+  - Symbole : N42
+  - Décimales : 18
+  - Supply initial : 1 000 000 N42
+
+### 2. Contrat bonus : `Niel42MultiSig.sol`
+- **Type** : Token ERC-20 avec gestion multi-signature (multisig)
+- **Fonctionnalités supplémentaires** :
+  - Création (mint) et destruction (burn) de tokens
+  - Ces actions sensibles nécessitent plusieurs validations (multi-signature) :
+    - Un admin propose une action (mint/burn)
+    - Les autres admins doivent approuver
+    - L’action n’est exécutée que si le nombre requis d’approbations est atteint
+  - Gestion des rôles :
+    - Owner (propriétaire) : droits les plus élevés, peut ajouter/retirer des admins et modifier le nombre de signatures requises
+    - Admins : peuvent approuver ou proposer des actions
+
+#### 🗂️ Schéma simplifié du multisig
+
+```
+Proposition (mint/burn) → Approbations par les admins → Exécution si seuil atteint
+```
+
+---
 
 ## ⚙️ Prérequis
 
-Environnement nécessaire :
-
 - Node.js v22 ou supérieur
-    ```zsh
-    node -v
-    ```
-
 - npm v10 ou supérieur
-    ```zsh
-    npm -v
-    ```
+- Un compte MetaMask configuré sur le réseau Sepolia (testnet Ethereum)
+- Des fonds de test Sepolia (obtenus via un faucet)
 
-- Compte MetaMask configuré sur le réseau Sepolia
+---
 
-- Accès à des fonds de test Sepolia (via faucet)
+## 📁 Structure du projet
 
-
-## Structure du projet
-
-Voici la structure principale du projet :
-
-```zsh
+```
 .
-├── contracts
-│   └── Niel42.sol                  // Code du contrat intelligent
-├── hardhat.config.ts               // Fichier de configuration Hardhat
-├── ignition
-│   └── modules
-│       └── Niel42.ts               // Module de déploiement
-├── package.json                    // Dépendances du projet
-├── README.md
-├── test
-│   └── Niel42.ts                   // Tests unitaires
-└── tsconfig.json                   // Configuration TypeScript
+├── code/
+│   ├── contracts/Niel42.sol           # Contrat principal ERC-20
+│   └── ...
+├── bonus/
+│   ├── contracts/Niel42MultiSig.sol   # Contrat multisig (bonus)
+│   └── ...
+├── documentation/README.md            # Ce guide
+└── ...
 ```
 
+---
 
-## 🧱 Structure du Token Niel42
+## 🚀 Déploiement étape par étape
 
-- Type de token : [ERC-20](https://eips.ethereum.org/EIPS/eip-20), un standard pour les tokens fongibles sur Ethereum.
-- Nom du token : Niel42
-- Symbole : N42
-- Nombre de décimales : 18
-- Supply initial : 1 000 000 N42
+1. **Configurer les variables d’environnement**
+   - Récupère une clé API Alchemy et ta clé privée Sepolia (MetaMask)
+   - Dans ton terminal :
+     ```zsh
+     export SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/your_alchemy_api_key_here"
+     export SEPOLIA_PRIVATE_KEY="your_private_key_here"
+     ```
 
+2. **Installer les dépendances**
+   - Place-toi dans le dossier racine et selon le contrat à déployer
+   - Installe les dépendances :
+     ```zsh
+     make install
+     make install_bonus
+     ```
 
-## Déploiement et interaction avec le token :
+3. **Compiler le smart-contract**
+    - En utilisant hardhat
+      ```zsh
+      make compile
+      make compile_bonus
+      ```
 
-Pour déployer et interagir avec le token Niel42, suivez ces étapes :
+4. **Lancer les tests pour verifier le fonctionnement des tokens**
+     - Via hardhat avec le framework de test integre a node
+       ```zsh
+       make test
+       make test_bonus
+       ```
 
-1. **Variables d'environnement** : Exportez vos variables d'environnement :
-    ```zsh
-    export SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/your_alchemy_api_key_here"
-    export SEPOLIA_PRIVATE_KEY="your_private_key_here"
-    ```
-    Remplacez `your_alchemy_api_key_here` par votre clé API Alchemy et `your_private_key_here` par votre clé privée Sepolia.
+5. **Déployer le contrat sur la blockchain**
+   - Depuis le dossier racine :
+     ```zsh
+     make deploy
+     make deploy_bonus
+     ```
+    À la fin du déploiement, l’adresse du contrat sera affichée dans le terminal.
 
-2. **Déploiement** : Déployez le contrat sur Sepolia :
-    ```zsh
-    make deploy
-    ```
+6. **Vérifier le contrat**
+   - Utilise [Etherscan Sepolia](https://sepolia.etherscan.io/) pour vérifier l’adresse et l’état du contrat
 
+6. **Interagir avec le contrat**
+   - Via MetaMask, Hardhat, ou les tests unitaires fournis dans le dossier `test/`
 
-## 🛠️ Étapes de Création
+---
 
-- Rédaction du contrat intelligent
-- Compilation
-- Déploiement sur un réseau local puis sur Sepolia
-- Vérification via block explorer ([Etherscan Sepolia](https://sepolia.etherscan.io/))
-- Interaction avec le contrat (via Metamask et tests unitaires)
+## 🧾 Vocabulaire Clé
 
+- **Token** : Actif numérique sur la blockchain
+- **Smart Contract** : Programme auto-exécutable sur la blockchain
+- **ERC-20** : Standard pour les tokens fongibles sur Ethereum
+- **Mint** : Création de nouveaux tokens
+- **Burn** : Destruction de tokens
+- **Blockchain** : Registre distribué, transparent et immuable
+- **Multisig** : Système où plusieurs signatures sont nécessaires pour valider une action
+- **Admin** : Personne ayant des droits de gestion sur le contrat
+- **Owner** : Propriétaire du contrat, avec tous les droits
 
-## 🧾 Vocabulaire Clé (Définitions simples)
-
-Token : Actif numérique sur la blockchain.
-
-Smart Contract : Programme auto-exécutable déployé sur la blockchain.
-
-ERC-20 : Standard pour les tokens fongibles sur Ethereum.
-
-Mint : Création de nouveaux tokens.
-
-Burn : Destruction de tokens.
-
-Blockchain : Registre distribué, transparent et immuable.
-
-
+---
 
 ## 📎 Ressources utiles
 
-<!-- Ethereum ERC-20 Standard -->
 - [Ethereum ERC-20 Standard](https://eips.ethereum.org/EIPS/eip-20)
-
-<!-- Hardhat -->
 - [Hardhat](https://hardhat.org/)
-
-<!-- Alchemy -->
 - [Alchemy](https://www.alchemy.com/)
-
-<!-- Ethereum Docs -->
 - [Ethereum Docs](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/)
-
-<!-- OpenZeppelin Docs -->
 - [OpenZeppelin](https://docs.openzeppelin.com/contracts/5.x/erc20)
-
-<!-- Sepolia Faucet -->
 - [Sepolia Faucet](https://www.alchemy.com/faucets/ethereum-sepolia)
-
-<!-- Solidity Docs -->
 - [Solidity Docs](https://docs.soliditylang.org/en/v0.8.28/)
+
+---
+
+N’hésite pas à lire le code source des contrats pour mieux comprendre leur fonctionnement, ou à consulter les tests pour voir des exemples d’utilisation !
