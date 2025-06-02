@@ -2,13 +2,17 @@
 
 ## 🔰 Introduction
 
-Ce projet a pour but de te faire découvrir le fonctionnement des tokens sur la blockchain Ethereum, à travers la création et le déploiement d’un token conforme au standard ERC-20. Même si tu n’as jamais utilisé la blockchain, ce guide t’accompagnera pas à pas.
+Ce projet a pour but de te faire découvrir le fonctionnement des tokens sur la blockchain Ethereum, à travers la création et le déploiement d’un token conforme au standard ERC-20.
+
+La blockchain Ethereum est un registre distribué (une liste de transactions enregistrées chronologiquement et partagées entre plusieurs nœuds) qui permet le déploiement de contrats intelligents.
+
+Les contrats intelligents sont du code déployé sur la blockchain avec lequel on peut interagir.
 
 ---
 
 ## 🌍 Qu’est-ce qu’un token ERC-20 ?
 
-Un token ERC-20 est un actif numérique standardisé sur la blockchain Ethereum. Il peut représenter de la monnaie, des points de fidélité, ou tout autre actif fongible. Les tokens ERC-20 sont compatibles avec de nombreux portefeuilles et applications.
+Un token ERC-20 est un actif numérique standardisé sur la blockchain Ethereum. Il peut représenter de la monnaie, des points de fidélité ou tout autre actif fongible. Les tokens ERC-20 sont compatibles avec de nombreux portefeuilles et applications.
 
 ---
 
@@ -74,7 +78,7 @@ Proposition (mint/burn) → Approbations par les admins → Exécution si seuil 
 ## 🚀 Déploiement étape par étape
 
 1. **Configurer les variables d’environnement**
-   - Récupère une clé API Alchemy et ta clé privée Sepolia (MetaMask)
+   - Récupère une clé API Alchemy et ta clé privée Sepolia (MetaMask).
    - Dans ton terminal :
      ```zsh
      export SEPOLIA_RPC_URL="https://eth-sepolia.g.alchemy.com/v2/your_alchemy_api_key_here"
@@ -82,22 +86,22 @@ Proposition (mint/burn) → Approbations par les admins → Exécution si seuil 
      ```
 
 2. **Installer les dépendances**
-   - Place-toi dans le dossier racine et selon le contrat à déployer
+   - Place-toi dans le dossier racine.
    - Installe les dépendances :
      ```zsh
      make install
      make install_bonus
      ```
 
-3. **Compiler le smart-contract**
-    - En utilisant hardhat
+3. **Compiler le smart contract**
+    - En utilisant Hardhat :
       ```zsh
       make compile
       make compile_bonus
       ```
 
-4. **Lancer les tests pour verifier le fonctionnement des tokens**
-     - Via hardhat avec le framework de test integre a node
+4. **Lancer les tests pour vérifier le fonctionnement des tokens**
+     - Via Hardhat avec le framework de test intégré à Node.js :
        ```zsh
        make test
        make test_bonus
@@ -112,14 +116,14 @@ Proposition (mint/burn) → Approbations par les admins → Exécution si seuil 
     À la fin du déploiement, l’adresse du contrat sera affichée dans le terminal.
 
 6. **Vérifier le contrat**
-   - Utilise [Etherscan Sepolia](https://sepolia.etherscan.io/) pour vérifier l’adresse et l’état du contrat
+   - Utilise [Etherscan Sepolia](https://sepolia.etherscan.io/) pour vérifier l’adresse et l’état du contrat.
 
-6. **Interagir avec le contrat**
-   - Via MetaMask, Hardhat, ou les tests unitaires fournis dans le dossier `test/`
+7. **Interagir avec le contrat**
+   - Via MetaMask, Hardhat ou les tests unitaires fournis dans le dossier `test/`.
 
 ---
 
-## 🧾 Vocabulaire Clé
+## 🧾 Vocabulaire clé
 
 - **Token** : Actif numérique sur la blockchain
 - **Smart Contract** : Programme auto-exécutable sur la blockchain

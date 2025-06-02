@@ -18,7 +18,7 @@ test:
 
 clean:
 	@echo "Cleaning up..."
-	@cd code && npx hardhat clean
+	@cd code && npx hardhat clean || true
 	@rm -rf code/cache
 
 fclean: clean
@@ -45,11 +45,15 @@ test_bonus:
 
 clean_bonus:
 	@echo "Cleaning up bonus..."
-	@cd bonus && npx hardhat clean
+	@cd bonus && npx hardhat clean || true
 	@rm -rf bonus/cache
 
 fclean_bonus: clean_bonus
 	@echo "Full clean bonus..."
 	@cd bonus && rm -rf artifacts node_modules package-lock.json ignition/deployments
+
+re: fclean all
+
+re_bonus: fclean_bonus bonus
 
 .PHONY: all install compile deploy test clean fclean install_bonus compile_bonus deploy_bonus test_bonus clean_bonus fclean_bonus
